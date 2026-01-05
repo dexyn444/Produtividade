@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FocusFlow Zen</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="zen-wrapper">
+        <header class="zen-header">
+            <div class="user-meta">
+                <span id="rank-title">Iniciante</span>
+                <div class="xp-tiny-bar"><div id="xp-fill"></div></div>
+            </div>
+            <button class="icon-btn" onclick="openModal()">⚙️</button>
+        </header>
+
+        <nav class="zen-calendar" id="calendar-grid"></nav>
+
+        <main class="zen-content">
+            <section class="day-focus">
+                <p id="full-date"></p>
+                <h1 id="day-label">Hoje</h1>
+            </section>
+
+            <div id="habit-stack" class="zen-list"></div>
+
+            <div class="zen-analysis">
+                <div class="analysis-tag">Insights</div>
+                <p id="insight-msg">Comece o seu dia com intenção.</p>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal-overlay">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-body">
+                <h2>Hábitos</h2>
+                <div class="input-zen">
+                    <input type="text" id="new-habit" placeholder="Escreva um novo hábito...">
+                    <button onclick="addHabit()">Adicionar</button>
+                </div>
+                <div id="manage-list" class="manage-list"></div>
+                <button class="btn-close" onclick="closeModal()">Concluído</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
