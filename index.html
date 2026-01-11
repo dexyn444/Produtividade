@@ -3,86 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FocusFlow Zen Pro</title>
+    <title>FocusFlow Evolution Pro</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-    <div class="zen-wrapper" id="main-app">
+    <audio id="victory-sfx" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
+
+    <div class="zen-wrapper">
         <header class="zen-header">
-            <div class="user-meta">
-                <span id="rank-title">Iniciante</span>
-                <div class="xp-tiny-bar"><div id="xp-fill"></div></div>
+            <div class="user-stats">
+                <span id="rank-title" class="rank-badge">Nível 1 | Evolução</span>
+                <div class="xp-container"><div id="xp-bar-fill" class="xp-fill"></div></div>
             </div>
-            <div class="header-actions">
-                <button class="icon-btn" onclick="showBadges()">🏅</button>
-                <button class="icon-btn" onclick="openModal()">⚙️</button>
-            </div>
+            <button class="icon-btn" onclick="UI.toggleSettings()">⚙️</button>
         </header>
 
-        <div class="faith-card" onclick="newQuote()">
-            <div class="faith-icon"></div>
-            <div class="faith-content">
-                <p id="quote-text">"Tudo posso naquele que me fortalece."</p>
-                <small id="quote-author">Filipenses 4:13</small>
+        <section class="evolution-banner">
+            <div class="evo-content">
+                <span class="evo-icon">🏆</span>
+                <p id="evo-message">A tua evolução de 1% começa agora!</p>
             </div>
-        </div>
+        </section>
 
         <nav class="zen-calendar" id="calendar-grid"></nav>
 
         <main class="zen-content">
-            <section class="day-focus">
-                <div class="focus-header-row">
-                    <div>
-                        <p id="full-date"></p>
-                        <h1 id="day-label">Hoje</h1>
-                    </div>
-                    <button class="share-btn" onclick="shareProgress()">✨ Compartilhar</button>
-                </div>
-            </section>
-
-            <div id="habit-stack" class="zen-list"></div>
-
-            <div class="zen-analysis">
-                <div class="analysis-tag">Corretor de Performance</div>
-                <p id="insight-msg">Comece o seu dia com intenção.</p>
+            <div id="habit-list" class="habit-stack"></div>
+            
+            <div class="performance-card">
+                <small>PROGRESSO DIÁRIO</small>
+                <div class="progress-bar"><div id="daily-fill" class="fill-success"></div></div>
+                <p id="insight-text">A constância vence o talento.</p>
             </div>
         </main>
     </div>
 
-    <div id="deep-focus" class="deep-focus-overlay" style="display:none">
-        <div class="focus-wrap">
-            <p>Foco no Hábito:</p>
-            <h2 id="focus-item-name">Atividade</h2>
-            <div class="focus-timer" id="focus-timer">25:00</div>
-            <button class="btn-exit-focus" onclick="exitDeepFocus()">Sair do Foco</button>
-        </div>
-    </div>
-
-    <div id="modal-badges" class="modal-overlay">
+    <div id="modal-settings" class="modal-overlay">
         <div class="modal-sheet">
-            <div class="modal-handle"></div>
-            <div class="modal-body">
-                <h2>Suas Conquistas</h2>
-                <div class="badges-grid" id="badges-container"></div>
-                <button class="btn-close" onclick="closeBadges()">Voltar</button>
+            <h3>Gerenciar Hábitos</h3>
+            <div class="input-group">
+                <input type="text" id="new-habit-input" placeholder="Ex: Configurar MikroTik...">
+                <button onclick="App.addHabit()">Add</button>
             </div>
-        </div>
-    </div>
-
-    <div id="modal" class="modal-overlay">
-        <div class="modal-sheet">
-            <div class="modal-handle"></div>
-            <div class="modal-body">
-                <h2>Hábitos</h2>
-                <div class="input-zen">
-                    <input type="text" id="new-habit" placeholder="Novo hábito...">
-                    <button onclick="addHabit()">Add</button>
-                </div>
-                <div id="manage-list" class="manage-list"></div>
-                <button class="btn-close" onclick="closeModal()">Concluído</button>
-            </div>
+            <div id="manage-list"></div>
+            <button class="btn-close" onclick="UI.toggleSettings()">Fechar</button>
         </div>
     </div>
 
