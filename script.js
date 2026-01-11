@@ -1,136 +1,160 @@
-let habits = JSON.parse(localStorage.getItem('ff_zen_habits')) || ["Meditação", "Treino"];
-let history = JSON.parse(localStorage.getItem('ff_zen_history')) || {};
-let xp = parseInt(localStorage.getItem('ff_zen_xp')) || 0;
-let activeDay = new Date().getDate();
-const today = new Date();
+/**
+ * FocusFlow Evolution Pro - Clean Code & Reward System
+ */
 
-let focusTimer;
-let secondsLeft = 1500;
+const State = {
+    habits: JSON.parse(localStorage.getItem('evolve_v3_habits')) || ["Treino", "Estudo", "Leitura"],
+    history: JSON.parse(localStorage.getItem('evolve_v3_history')) || {},
+    xp: parseInt(localStorage.getItem('evolve_v3_xp')) || 0,
+    today: new Date().getDate(),
+    activeDay: new Date().getDate(),
 
-const quotes = [
-    { text: "Tudo posso naquele que me fortalece.", author: "Filipenses 4:13" },
-    { text: "O Senhor é o meu pastor, nada me faltará.", author: "Salmo 23:1" },
-    { text: "Não fui eu que ordenei? Seja forte e corajoso!", author: "Josué 1:9" },
-    { text: "A fé não torna as coisas fáceis, torna as possíveis.", author: "Reflexão" }
-];
-
-const badges = [
-    { id: 'first', name: 'Início', icon: '🌱', goal: 1 },
-    { id: 'week', name: '7 Dias', icon: '🔥', goal: 7 },
-    { id: 'master', name: 'Mestre', icon: '👑', goal: 30 }
-];
-
-function init() {
-    renderCalendar();
-    renderHabits();
-    updateUI();
-    newQuote();
-}
-
-function updateUI() {
-    const level = Math.floor(xp / 100) + 1;
-    document.getElementById('rank-title').innerText = `Nível ${level} | BioHacker`;
-    document.getElementById('xp-fill').style.width = `${xp % 100}%`;
-    document.getElementById('full-date').innerText = today.toLocaleDateString('pt-BR', {day:'numeric', month:'long'});
-
-    const doneToday = (history[activeDay] || []).length;
-    const pc = habits.length > 0 ? (doneToday / habits.length) * 100 : 0;
-    document.getElementById('insight-msg').innerText = pc >= 100 ? "Dia Perfeito!" : "Foque no próximo passo.";
-}
-
-function newQuote() {
-    const q = quotes[Math.floor(Math.random() * quotes.length)];
-    document.getElementById('quote-text').innerText = `"${q.text}"`;
-    document.getElementById('quote-author').innerText = q.author;
-}
-
-function renderCalendar() {
-    const grid = document.getElementById('calendar-grid');
-    grid.innerHTML = '';
-    const week = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-    for(let i=1; i<=31; i++) {
-        const dObj = new Date(today.getFullYear(), today.getMonth(), i);
-        grid.innerHTML += `
-            <div class="day-pill ${i===activeDay?'active':''}" onclick="setDay(${i})">
-                <span>${week[dObj.getDay()]}</span><b>${i}</b>
-            </div>`;
+    save() {
+        localStorage.setItem('evolve_v3_habits', JSON.stringify(this.habits));
+        localStorage.setItem('evolve_v3_history', JSON.stringify(this.history));
+        localStorage.setItem('evolve_v3_xp', this.xp);
+        UI.refresh();
     }
-}
+};
 
-function setDay(d) { activeDay = d; renderCalendar(); renderHabits(); updateUI(); }
-
-function renderHabits() {
-    const stack = document.getElementById('habit-stack');
-    stack.innerHTML = '';
-    habits.forEach(h => {
-        const done = (history[activeDay] || []).includes(h);
-        stack.innerHTML += `
-            <div class="habit-card ${done?'done':''}">
-                <b onclick="enterDeepFocus('${h}')">${h} <small style="color:var(--accent)">⏱️</small></b>
-                <div class="check-trigger" onclick="toggleHabit('${h}')">${done?'✓':''}</div>
-            </div>`;
-    });
-}
-
-function toggleHabit(h) {
-    if (!history[activeDay]) history[activeDay] = [];
-    const idx = history[activeDay].indexOf(h);
-    if (idx > -1) { history[activeDay].splice(idx, 1); xp = Math.max(0, xp-15); }
-    else { 
-        history[activeDay].push(h); xp += 20; 
-        if(history[activeDay].length === habits.length) confetti({particleCount:100, origin:{y:0.8}});
+const AudioSystem = {
+    playVictory() {
+        const sfx = document.getElementById('victory-sfx');
+        sfx.currentTime = 0;
+        sfx.play().catch(e => console.log("Áudio aguardando interação do usuário."));
     }
-    save();
-}
+};
 
-function enterDeepFocus(h) {
-    document.getElementById('focus-item-name').innerText = h;
-    document.getElementById('deep-focus').style.display = 'flex';
-    secondsLeft = 1500;
-    focusTimer = setInterval(() => {
-        secondsLeft--;
-        const m = Math.floor(secondsLeft/60), s = secondsLeft%60;
-        document.getElementById('focus-timer').innerText = `${m}:${s<10?'0':''}${s}`;
-        if(secondsLeft<=0) { clearInterval(focusTimer); xp+=50; save(); exitDeepFocus(); }
-    }, 1000);
-}
+const Coach = {
+    messages: [
+        "Foco absoluto! Estás no caminho certo.",
+        "A tua disciplina é o teu superpoder!",
+        "1% melhor a cada dia. Continua!",
+        "Não pares até te orgulhares de ti mesmo.",
+        "O sucesso é o resultado da tua constância."
+    ],
+    celebrate(isFullDay) {
+        AudioSystem.playVictory();
+        
+        const msg = isFullDay ? "DOMINAÇÃO! Todos os objetivos concluídos! 🏆" : this.messages[Math.floor(Math.random() * this.messages.length)];
+        document.getElementById('evo-message').innerText = msg;
 
-function exitDeepFocus() { clearInterval(focusTimer); document.getElementById('deep-focus').style.display='none'; }
+        confetti({
+            particleCount: isFullDay ? 180 : 60,
+            spread: 70,
+            origin: { y: 0.8 },
+            colors: ['#6366f1', '#10b981', '#ffffff']
+        });
+    }
+};
 
-function showBadges() {
-    document.getElementById('modal-badges').style.display='block';
-    const container = document.getElementById('badges-container');
-    const days = Object.keys(history).length;
-    container.innerHTML = badges.map(b => `
-        <div class="badge-item ${days >= b.goal ? 'unlocked' : ''}">
-            <span>${b.icon}</span><br><small>${b.name}</small>
-        </div>`).join('');
-}
+const UI = {
+    refresh() {
+        this.renderCalendar();
+        this.renderHabits();
+        this.updateStats();
+    },
 
-function closeBadges() { document.getElementById('modal-badges').style.display='none'; }
+    updateStats() {
+        const level = Math.floor(State.xp / 100) + 1;
+        const doneToday = (State.history[State.activeDay] || []).length;
+        const pc = State.habits.length > 0 ? (doneToday / State.habits.length) * 100 : 0;
 
-function shareProgress() {
-    const text = `Meu progresso FocusFlow: ${(history[activeDay]||[]).length} hábitos feitos hoje! 🚀`;
-    if(navigator.share) navigator.share({title:'FocusFlow', text: text});
-    else alert("Progresso copiado!");
-}
+        document.getElementById('rank-title').innerText = `Nível ${level} | Evolução Constante`;
+        document.getElementById('xp-bar-fill').style.width = `${State.xp % 100}%`;
+        document.getElementById('daily-fill').style.width = `${pc}%`;
+        document.getElementById('insight-text').innerText = pc === 100 ? "Elite: Missão Cumprida!" : "Mantém o foco no objetivo.";
+    },
 
-function openModal() { document.getElementById('modal').style.display='block'; renderManage(); }
-function closeModal() { document.getElementById('modal').style.display='none'; }
-function addHabit() { const i = document.getElementById('new-habit'); if(i.value.trim()){ habits.push(i.value.trim()); i.value=''; save(); renderManage(); } }
-function renderManage() {
-    document.getElementById('manage-list').innerHTML = habits.map((h,i) => `
-        <div style="display:flex; justify-content:space-between; padding:10px 0;">
-            <input type="text" value="${h}" onchange="habits[${i}]=this.value; save();" style="background:none; border:none; color:#fff;">
-            <button onclick="habits.splice(${i},1); save(); renderManage();" style="color:red; background:none; border:none;">✕</button>
-        </div>`).join('');
-}
+    renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        grid.innerHTML = '';
+        const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
 
-function save() {
-    localStorage.setItem('ff_zen_habits', JSON.stringify(habits));
-    localStorage.setItem('ff_zen_history', JSON.stringify(history));
-    localStorage.setItem('ff_zen_xp', xp);
-    renderHabits(); renderCalendar(); updateUI();
-}
+        for (let i = 1; i <= lastDay; i++) {
+            const done = (State.history[i] || []).length;
+            const isComplete = State.habits.length > 0 && done === State.habits.length;
+            
+            const div = document.createElement('div');
+            div.className = `day-pill ${i === State.activeDay ? 'active' : ''} ${isComplete ? 'completed' : ''}`;
+            div.onclick = () => { State.activeDay = i; this.refresh(); };
+            div.innerHTML = `<b>${i}</b><div class="status-dot"></div>`;
+            grid.appendChild(div);
+        }
+    },
 
-window.onload = init;
+    renderHabits() {
+        const container = document.getElementById('habit-list');
+        container.innerHTML = '';
+        const isToday = State.activeDay === State.today;
+
+        State.habits.forEach(h => {
+            const isDone = (State.history[State.activeDay] || []).includes(h);
+            const card = document.createElement('div');
+            card.className = `habit-card ${isDone ? 'done' : ''}`;
+            card.style.opacity = isToday ? '1' : '0.4';
+            
+            card.innerHTML = `
+                <b>${h}</b>
+                <div class="check-circle" onclick="App.toggleTask('${h}')">
+                    ${isDone ? '✓' : ''}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    },
+
+    toggleSettings() {
+        const modal = document.getElementById('modal-settings');
+        modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        if(modal.style.display === 'block') this.renderManageList();
+    },
+
+    renderManageList() {
+        const list = document.getElementById('manage-list');
+        list.innerHTML = State.habits.map((h, i) => `
+            <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #111;">
+                <span>${h}</span>
+                <button onclick="App.removeHabit(${i})" style="color:#ff4444; background:none; border:none; cursor:pointer;">✕</button>
+            </div>
+        `).join('');
+    }
+};
+
+const App = {
+    toggleTask(h) {
+        if (State.activeDay !== State.today) return alert("Só podes marcar o dia de hoje!");
+
+        if (!State.history[State.today]) State.history[State.today] = [];
+        const dayHistory = State.history[State.today];
+        const index = dayHistory.indexOf(h);
+
+        if (index === -1) {
+            dayHistory.push(h);
+            State.xp += 25;
+            Coach.celebrate(dayHistory.length === State.habits.length);
+        } else {
+            dayHistory.splice(index, 1);
+            State.xp = Math.max(0, State.xp - 15);
+        }
+        State.save();
+    },
+
+    addHabit() {
+        const input = document.getElementById('new-habit-input');
+        if (input.value.trim()) {
+            State.habits.push(input.value.trim());
+            input.value = '';
+            State.save();
+            UI.renderManageList();
+        }
+    },
+
+    removeHabit(index) {
+        State.habits.splice(index, 1);
+        State.save();
+        UI.renderManageList();
+    }
+};
+
+window.onload = () => UI.refresh();
